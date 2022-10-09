@@ -167,7 +167,7 @@ model CompanyProspect {
 }
 
 model PersonProspect {
-  id        String  @id @default(cuid())
+  id        Int     @id @default(dbgenerated("UUID_SHORT()"))
   publicId  String  @unique
   email     String?
   firstName String  @db.VarChar(200)
@@ -214,9 +214,9 @@ model PersonProspect {
 }
 
 model WorkExperience {
-  id String @id @default(cuid())
+  id String @id @default(dbgenerated("UUID()"))
 
-  personProspectId String         @unique
+  personProspectId Int            @unique
   personProspect   PersonProspect @relation(fields: [personProspectId], references: [id])
 
   experience Json //-> ExperienceItem[] //sorted

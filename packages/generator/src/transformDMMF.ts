@@ -1,6 +1,8 @@
 import type { DMMF } from "@prisma/generator-helper";
 import { genPrelude } from "~/prelude";
 
+const supportedDefaultFunctions = ["now", "autoincrement", "dbgenerated"];
+
 function isScalarType(kind: DMMF.Field["kind"]) {
 	return kind === "scalar";
 }
@@ -24,16 +26,22 @@ const dbScalarToTS = (type: DMMF.Field["type"]) => {
 	return type.toLowerCase();
 };
 
+const isSupportedDefault = (field: DMMF.Field) =>
+	field.hasDefaultValue &&
+	(typeof field.default !== "object" ||
+		Array.isArray(field.default) ||
+		supportedDefaultFunctions.includes(field.default?.name));
+
 const genScalarColumn = (field: DMMF.Field) =>
 	`${field.name}: ${
-		field.hasDefaultValue
+		isSupportedDefault(field)
 			? `Generated<${dbScalarToTS(field.type)}>`
 			: `${dbScalarToTS(field.type)}${
-					!field.isRequired && !field.hasDefaultValue ? " | null" : ""
+					!field.isRequired && !isSupportedDefault(field) ? " | null" : ""
 			  }`
 	};`;
 const genEnumColumn = (field: DMMF.Field) =>
-	`${field.name}${!field.isRequired && !field.hasDefaultValue ? "?" : ""}: ${
+	`${field.name}${!isSupportedDefault(field) ? "?" : ""}: ${
 		field.hasDefaultValue ? `Generated<${field.type}>` : field.type
 	};`;
 
@@ -47,11 +55,11 @@ const genTable = (modelInfo: DMMF.Model) =>
 	`export interface ${modelInfo.dbName ?? modelInfo.name} {
         ${modelInfo.fields.map(genColumn).join("\n")}
     }
-	
 	${genTableExtracts(modelInfo)}`;
 
 const genTableExtracts = (modelInfo: DMMF.Model) => {
 	const tableName = modelInfo.dbName ?? modelInfo.name;
+	console.log(...modelInfo.fields);
 	return `
 		export type ${tableName}Row = Selectable<${tableName}>
 		export type Insertable${tableName}Row = Insertable<${tableName}>

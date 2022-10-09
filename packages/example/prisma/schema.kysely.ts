@@ -1,10 +1,4 @@
-import type {
-	GeneratedAlways,
-	ColumnType,
-	Selectable,
-	Insertable,
-	Updateable,
-} from "kysely";
+import type { ColumnType, Insertable, Selectable, Updateable } from "kysely";
 
 type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 	? ColumnType<S, I | undefined, U>
@@ -34,7 +28,7 @@ export enum MembershipStatus {
 	PAID = "PAID",
 }
 export interface AuthAllowList {
-	id: Generated<string>;
+	id: string;
 	domain: string;
 	createdAt: Generated<Timestamp>;
 	updatedAt: Timestamp;
@@ -45,7 +39,7 @@ export type InsertableAuthAllowListRow = Insertable<AuthAllowList>;
 export type UpdateableAuthAllowListRow = Updateable<AuthAllowList>;
 
 export interface User {
-	id: Generated<string>;
+	id: string;
 	publicId: string;
 	email: string;
 	emailVerified: Generated<Timestamp>;
@@ -64,7 +58,7 @@ export type InsertableUserRow = Insertable<User>;
 export type UpdateableUserRow = Updateable<User>;
 
 export interface Organization {
-	id: Generated<string>;
+	id: string;
 	publicId: string;
 	name: string;
 	industry: string;
@@ -86,7 +80,7 @@ export type InsertableOrganizationRow = Insertable<Organization>;
 export type UpdateableOrganizationRow = Updateable<Organization>;
 
 export interface EmailDomain {
-	id: Generated<string>;
+	id: string;
 	domain: string;
 	domainVerified: Generated<Timestamp>;
 	verificationEmail: string;
@@ -98,8 +92,8 @@ export type InsertableEmailDomainRow = Insertable<EmailDomain>;
 export type UpdateableEmailDomainRow = Updateable<EmailDomain>;
 
 export interface Membership {
-	id: Generated<string>;
-	role: MembershipRole;
+	id: string;
+	role?: MembershipRole;
 	title: string;
 	userId: string | null;
 
@@ -117,7 +111,7 @@ export type InsertableMembershipRow = Insertable<Membership>;
 export type UpdateableMembershipRow = Updateable<Membership>;
 
 export interface CompanyProspect {
-	id: Generated<string>;
+	id: string;
 	publicId: string;
 	name: string;
 	domain: string;
@@ -150,7 +144,7 @@ export type InsertableCompanyProspectRow = Insertable<CompanyProspect>;
 export type UpdateableCompanyProspectRow = Updateable<CompanyProspect>;
 
 export interface PersonProspect {
-	id: Generated<string>;
+	id: string;
 	publicId: string;
 	email: string | null;
 	firstName: string;
