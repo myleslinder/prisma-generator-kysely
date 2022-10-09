@@ -64,8 +64,7 @@ model Organization {
   emailDomains EmailDomain[]
   members      Membership[]
 
-  companyProspects CompanyProspect[]
-  personProspects  PersonProspect[]
+  personProspects AModel[]
 
   billingEmail         String?
   customerId           String?   @unique
@@ -101,13 +100,10 @@ model Membership {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
-  companyProspects CompanyProspect[]
-  personProspects  PersonProspect[]
-
   status          MembershipStatus @default(FREE)
   statusUpdatedAt DateTime         @default(now())
 
-  prospectGenerationBonus Int @default(0)
+  bonus Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -120,53 +116,7 @@ model Membership {
 
 ////////////////////////////////////////////////////////////////
 
-model CompanyProspect {
-  id       String @id @default(cuid())
-  publicId String @unique
-  name     String
-  domain   String
-
-  industry          String? @db.VarChar(200)
-  industryPersyCode String? @db.VarChar(20)
-
-  description      String? @db.Text
-  shortDescription String? @db.Text
-  logo             String? @db.VarChar(2048)
-
-  linkedinPublicId String?
-
-  linkedinTags   Json? // string[]
-  tags           Json? // string[]
-  tech           Json? // string[]
-  techCategories Json? // string[]
-
-  foundedYear   Int?
-  location      String? @db.VarChar(200)
-  timeZone      String? @db.VarChar(200)
-  employeeSize  Int?
-  employeeRange String? @db.VarChar(200)
-
-  linkedinFollowers Int?
-
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  memberOwnerId String
-  memberOwner   Membership @relation(fields: [memberOwnerId], references: [id])
-
-  people PersonProspect[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([organizationId, memberOwnerId, domain])
-  @@unique([organizationId, memberOwnerId, linkedinPublicId])
-  @@unique([organizationId, memberOwnerId, publicId])
-  @@index([organizationId, memberOwnerId])
-  @@index([organizationId])
-}
-
-model PersonProspect {
+model AModel {
   id        Int     @id @default(dbgenerated("UUID_SHORT()"))
   publicId  String  @unique
   email     String?
@@ -174,61 +124,26 @@ model PersonProspect {
   lastName  String  @db.VarChar(200)
   avatar    String? @db.VarChar(2048)
 
-  role                String? @db.VarChar(200)
-  seniority           String? @db.VarChar(200)
-  seniorityPersyCode  String? @db.VarChar(20)
-  department          String? @db.VarChar(200)
-  departmentPersyCode String? @db.VarChar(20)
-
-  location String? @db.VarChar(200)
-  timeZone String? @db.VarChar(200)
-  bio      String? @db.Text
-
-  linkedinPublicId String?
-
-  workExperience  WorkExperience?
-  awards          Json? // MemberAward[]
-  certifications  Json? // MemberCertification[]
-  skills          Json? // string[]
-  education       Json? // MemberEducation[]
-  interests       Json? // string[]
-  recommendations Json? // string[]
-
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
   memberOwnerId String
-  memberOwner   Membership @relation(fields: [memberOwnerId], references: [id])
-
-  companyProspectId String?
-  companyProspect   CompanyProspect? @relation(fields: [companyProspectId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([organizationId, memberOwnerId, email])
-  @@unique([organizationId, memberOwnerId, linkedinPublicId])
   @@unique([organizationId, memberOwnerId, publicId])
   @@index([organizationId])
   @@index([organizationId, memberOwnerId])
 }
 
-model WorkExperience {
+model BModel {
   id String @id @default(dbgenerated("UUID()"))
 
-  personProspectId Int            @unique
-  personProspect   PersonProspect @relation(fields: [personProspectId], references: [id])
+  personProspectId Int @unique
 
-  experience Json //-> ExperienceItem[] //sorted
-
-  roleCount     Int
-  totalTenure   Int
-  employerCount Int
-  averageTenure Int
-
-  changes    Json? //-> { [K in Category]: ExperienceChange };
-  current    Json? // -> { experience: ExperienceItem; categories: { [K in Category]?: CategoryAggregate<K>; }; };
-  categories Json? //-> { [K in Category]?: { [k: string]: CategoryAggregate } };
+  experience Json
 
   sourceUpdatedAt DateTime
 
