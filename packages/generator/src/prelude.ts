@@ -1,9 +1,12 @@
 type PreludeFlags = {
 	json: boolean;
 	generated: boolean;
+	generatedAlways: boolean;
 };
 const genPrelude = (flags: PreludeFlags) => `
-    import type { GeneratedAlways, ColumnType, Selectable, Insertable, Updateable } from "kysely"
+    import type { ${
+			flags.generatedAlways ? "GeneratedAlways," : ""
+		} ColumnType, Selectable, Insertable, Updateable } from "kysely"
 
 	${
 		flags.generated

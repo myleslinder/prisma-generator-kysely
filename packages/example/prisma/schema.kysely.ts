@@ -1,4 +1,10 @@
-import type { ColumnType, Insertable, Selectable, Updateable } from "kysely";
+import type {
+	ColumnType,
+	GeneratedAlways,
+	Insertable,
+	Selectable,
+	Updateable,
+} from "kysely";
 
 type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 	? ColumnType<S, I | undefined, U>
@@ -48,6 +54,7 @@ export interface User {
 	avatar: string | null;
 
 	linkedinPublicId: string | null;
+	someList: string | null;
 	experience: Json | null;
 	createdAt: Generated<Timestamp>;
 	updatedAt: Timestamp;
@@ -93,7 +100,7 @@ export type UpdateableEmailDomainRow = Updateable<EmailDomain>;
 
 export interface Membership {
 	id: string;
-	role?: MembershipRole;
+	role: MembershipRole;
 	title: string;
 	userId: string | null;
 
@@ -101,7 +108,7 @@ export interface Membership {
 
 	status: Generated<MembershipStatus>;
 	statusUpdatedAt: Generated<Timestamp>;
-	prospectGenerationBonus: Generated<number>;
+	bonus: Generated<number>;
 	createdAt: Generated<Timestamp>;
 	updatedAt: Timestamp;
 }
@@ -110,96 +117,36 @@ export type MembershipRow = Selectable<Membership>;
 export type InsertableMembershipRow = Insertable<Membership>;
 export type UpdateableMembershipRow = Updateable<Membership>;
 
-export interface CompanyProspect {
-	id: string;
-	publicId: string;
-	name: string;
-	domain: string;
-	industry: string | null;
-	industryPersyCode: string | null;
-	description: string | null;
-	shortDescription: string | null;
-	logo: string | null;
-	linkedinPublicId: string | null;
-	linkedinTags: Json | null;
-	tags: Json | null;
-	tech: Json | null;
-	techCategories: Json | null;
-	foundedYear: number | null;
-	location: string | null;
-	timeZone: string | null;
-	employeeSize: number | null;
-	employeeRange: string | null;
-	linkedinFollowers: number | null;
-	organizationId: string;
-
-	memberOwnerId: string;
-
-	createdAt: Generated<Timestamp>;
-	updatedAt: Timestamp;
-}
-
-export type CompanyProspectRow = Selectable<CompanyProspect>;
-export type InsertableCompanyProspectRow = Insertable<CompanyProspect>;
-export type UpdateableCompanyProspectRow = Updateable<CompanyProspect>;
-
-export interface PersonProspect {
-	id: string;
+export interface AModel {
+	id: GeneratedAlways<number>;
 	publicId: string;
 	email: string | null;
 	firstName: string;
 	lastName: string;
 	avatar: string | null;
-	role: string | null;
-	seniority: string | null;
-	seniorityPersyCode: string | null;
-	department: string | null;
-	departmentPersyCode: string | null;
-	location: string | null;
-	timeZone: string | null;
-	bio: string | null;
-	linkedinPublicId: string | null;
-
-	awards: Json | null;
-	certifications: Json | null;
-	skills: Json | null;
-	education: Json | null;
-	interests: Json | null;
-	recommendations: Json | null;
 	organizationId: string;
 
 	memberOwnerId: string;
-
-	companyProspectId: string | null;
-
 	createdAt: Generated<Timestamp>;
 	updatedAt: Timestamp;
 }
 
-export type PersonProspectRow = Selectable<PersonProspect>;
-export type InsertablePersonProspectRow = Insertable<PersonProspect>;
-export type UpdateablePersonProspectRow = Updateable<PersonProspect>;
+export type AModelRow = Selectable<AModel>;
+export type InsertableAModelRow = Insertable<AModel>;
+export type UpdateableAModelRow = Updateable<AModel>;
 
-export interface WorkExperience {
-	id: Generated<string>;
-	personProspectId: string;
-
+export interface BModel {
+	id: GeneratedAlways<string>;
+	personProspectId: number;
 	experience: Json;
-	roleCount: number;
-	totalTenure: number;
-	employerCount: number;
-	averageTenure: number;
-	changes: Json | null;
-	current: Json | null;
-	categories: Json | null;
 	sourceUpdatedAt: Timestamp;
 	createdAt: Generated<Timestamp>;
 	updatedAt: Timestamp;
 }
 
-export type WorkExperienceRow = Selectable<WorkExperience>;
-export type InsertableWorkExperienceRow = Insertable<WorkExperience>;
-export type UpdateableWorkExperienceRow = Updateable<WorkExperience>;
+export type BModelRow = Selectable<BModel>;
+export type InsertableBModelRow = Insertable<BModel>;
+export type UpdateableBModelRow = Updateable<BModel>;
 
 export interface DB {
 	AuthAllowList: AuthAllowList;
@@ -207,7 +154,6 @@ export interface DB {
 	Organization: Organization;
 	EmailDomain: EmailDomain;
 	Membership: Membership;
-	CompanyProspect: CompanyProspect;
-	PersonProspect: PersonProspect;
-	WorkExperience: WorkExperience;
+	AModel: AModel;
+	BModel: BModel;
 }

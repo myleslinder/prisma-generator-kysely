@@ -32,17 +32,22 @@ const isSupportedDefault = (field: DMMF.Field) =>
 		Array.isArray(field.default) ||
 		supportedDefaultFunctions.includes(field.default?.name));
 
+const generatedType = (isId: boolean) =>
+	isId ? "GeneratedAlways" : "Generated";
+
 const genScalarColumn = (field: DMMF.Field) =>
 	`${field.name}: ${
 		isSupportedDefault(field)
-			? `Generated<${dbScalarToTS(field.type)}>`
-			: `${dbScalarToTS(field.type)}${
+			? `${generatedType(field.isId)}<${dbScalarToTS(field.type)}>`
+			: `${dbScalarToTS(field.type)}${field.isList ? "[]" : ""}${
 					!field.isRequired && !isSupportedDefault(field) ? " | null" : ""
 			  }`
 	};`;
 const genEnumColumn = (field: DMMF.Field) =>
-	`${field.name}${!isSupportedDefault(field) ? "?" : ""}: ${
-		field.hasDefaultValue ? `Generated<${field.type}>` : field.type
+	`${field.name}: ${
+		isSupportedDefault(field)
+			? `${generatedType(field.isId)}<${field.type}>`
+			: field.type
 	};`;
 
 const genColumn = (field: DMMF.Field) => {
@@ -59,7 +64,6 @@ const genTable = (modelInfo: DMMF.Model) =>
 
 const genTableExtracts = (modelInfo: DMMF.Model) => {
 	const tableName = modelInfo.dbName ?? modelInfo.name;
-	console.log(...modelInfo.fields);
 	return `
 		export type ${tableName}Row = Selectable<${tableName}>
 		export type Insertable${tableName}Row = Insertable<${tableName}>
@@ -77,13 +81,18 @@ const genDb = (models: DMMF.Model[]) =>
 			.join("\n")}
 	}`;
 
-// TODO: filter out isUpdatedAt?
 function transformDMMF(dmmf: DMMF.Document): string {
 	const { models, enums } = dmmf.datamodel;
 
-	const hasJson = models.some((m) => m.fields.some((f) => f.type === "Json"));
-	const hasGenerated = models.some((m) =>
-		m.fields.some((f) => f.hasDefaultValue),
+	let hasJson = false;
+	let hasGenerated = false;
+	let hasGeneratedAlways = false;
+	models.forEach((m) =>
+		m.fields.forEach((f) => {
+			hasJson ||= f.type === "Json";
+			hasGenerated ||= isSupportedDefault(f);
+			hasGeneratedAlways ||= isSupportedDefault(f) && f.isId;
+		}),
 	);
 
 	const tsEnums = enums.map(genEnum).join("\n");
@@ -92,6 +101,7 @@ function transformDMMF(dmmf: DMMF.Document): string {
 	return `${genPrelude({
 		json: hasJson,
 		generated: hasGenerated,
+		generatedAlways: hasGeneratedAlways,
 	})}${tsEnums}\n${tsInterfaces}\n${genDb(models)}`;
 }
 

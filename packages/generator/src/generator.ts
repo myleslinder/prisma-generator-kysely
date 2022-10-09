@@ -4,9 +4,8 @@ import {
 	type GeneratorOptions,
 } from "@prisma/generator-helper";
 
-import { writeFile } from "fs/promises";
-import { formatFile } from "~/formatFile";
 import { transformDMMF } from "~/transformDMMF";
+import { writeFormattedFile } from "~/writeFormattedFile";
 import { version } from "../package.json";
 
 // const GENERATOR_NAME = "prisma-generator-kysely";
@@ -23,11 +22,7 @@ generatorHandler({
 	},
 	onGenerate: async (options: GeneratorOptions) => {
 		const outputPath = options.generator.output?.value ?? OUTPUT_PATH;
-		const dataSources = options.datasources;
-		if (!dataSources.find((s) => s.activeProvider === "mysql")) {
-			throw new Error("Only mysql is supported atm");
-		}
 		const output = transformDMMF(options.dmmf);
-		await writeFile(outputPath, await formatFile(output));
+		await writeFormattedFile(outputPath, output);
 	},
 });
