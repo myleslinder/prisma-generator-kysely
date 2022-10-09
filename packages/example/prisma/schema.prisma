@@ -1,0 +1,237 @@
+// Docs: https://pris.ly/d/prisma-schema
+
+generator kysely {
+  provider = "prisma-generator-kysely"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  ADMIN
+  STANDARD
+  LIMITED
+}
+
+enum MembershipStatus {
+  FREE
+  PAID
+}
+
+model AuthAllowList {
+  id     String @id @default(cuid())
+  domain String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id       String @id @default(cuid())
+  publicId String @unique @db.VarChar(500)
+
+  email         String    @unique
+  emailVerified DateTime? @default(now())
+
+  firstName String  @db.VarChar(200)
+  lastName  String  @db.VarChar(200)
+  avatar    String? @db.VarChar(2048)
+
+  memberships Membership[]
+
+  linkedinPublicId String?
+
+  experience Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Organization {
+  id       String @id @default(cuid())
+  publicId String @unique @db.VarChar(500)
+
+  name             String  @db.VarChar(200)
+  industry         String
+  description      String  @db.Text
+  shortDescription String  @db.Text
+  logo             String? @db.VarChar(2048)
+
+  linkedinPublicId String?
+
+  emailDomains EmailDomain[]
+  members      Membership[]
+
+  companyProspects CompanyProspect[]
+  personProspects  PersonProspect[]
+
+  billingEmail         String?
+  customerId           String?   @unique
+  subscriptionId       String?   @unique
+  subscriptionPaidUpTo DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailDomain {
+  id                String   @id @default(cuid())
+  domain            String
+  domainVerified    DateTime @default(now())
+  verificationEmail String
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([domain, organizationId])
+  @@index([domain])
+  @@index([organizationId])
+}
+
+model Membership {
+  id    String         @id @default(cuid())
+  role  MembershipRole
+  title String         @db.VarChar(200)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  companyProspects CompanyProspect[]
+  personProspects  PersonProspect[]
+
+  status          MembershipStatus @default(FREE)
+  statusUpdatedAt DateTime         @default(now())
+
+  prospectGenerationBonus Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([organizationId, userId])
+}
+
+////////////////////////////////////////////////////////////////
+
+model CompanyProspect {
+  id       String @id @default(cuid())
+  publicId String @unique
+  name     String
+  domain   String
+
+  industry          String? @db.VarChar(200)
+  industryPersyCode String? @db.VarChar(20)
+
+  description      String? @db.Text
+  shortDescription String? @db.Text
+  logo             String? @db.VarChar(2048)
+
+  linkedinPublicId String?
+
+  linkedinTags   Json? // string[]
+  tags           Json? // string[]
+  tech           Json? // string[]
+  techCategories Json? // string[]
+
+  foundedYear   Int?
+  location      String? @db.VarChar(200)
+  timeZone      String? @db.VarChar(200)
+  employeeSize  Int?
+  employeeRange String? @db.VarChar(200)
+
+  linkedinFollowers Int?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  memberOwnerId String
+  memberOwner   Membership @relation(fields: [memberOwnerId], references: [id])
+
+  people PersonProspect[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, memberOwnerId, domain])
+  @@unique([organizationId, memberOwnerId, linkedinPublicId])
+  @@unique([organizationId, memberOwnerId, publicId])
+  @@index([organizationId, memberOwnerId])
+  @@index([organizationId])
+}
+
+model PersonProspect {
+  id        String  @id @default(cuid())
+  publicId  String  @unique
+  email     String?
+  firstName String  @db.VarChar(200)
+  lastName  String  @db.VarChar(200)
+  avatar    String? @db.VarChar(2048)
+
+  role                String? @db.VarChar(200)
+  seniority           String? @db.VarChar(200)
+  seniorityPersyCode  String? @db.VarChar(20)
+  department          String? @db.VarChar(200)
+  departmentPersyCode String? @db.VarChar(20)
+
+  location String? @db.VarChar(200)
+  timeZone String? @db.VarChar(200)
+  bio      String? @db.Text
+
+  linkedinPublicId String?
+
+  workExperience  WorkExperience?
+  awards          Json? // MemberAward[]
+  certifications  Json? // MemberCertification[]
+  skills          Json? // string[]
+  education       Json? // MemberEducation[]
+  interests       Json? // string[]
+  recommendations Json? // string[]
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  memberOwnerId String
+  memberOwner   Membership @relation(fields: [memberOwnerId], references: [id])
+
+  companyProspectId String?
+  companyProspect   CompanyProspect? @relation(fields: [companyProspectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, memberOwnerId, email])
+  @@unique([organizationId, memberOwnerId, linkedinPublicId])
+  @@unique([organizationId, memberOwnerId, publicId])
+  @@index([organizationId])
+  @@index([organizationId, memberOwnerId])
+}
+
+model WorkExperience {
+  id String @id @default(cuid())
+
+  personProspectId String         @unique
+  personProspect   PersonProspect @relation(fields: [personProspectId], references: [id])
+
+  experience Json //-> ExperienceItem[] //sorted
+
+  roleCount     Int
+  totalTenure   Int
+  employerCount Int
+  averageTenure Int
+
+  changes    Json? //-> { [K in Category]: ExperienceChange };
+  current    Json? // -> { experience: ExperienceItem; categories: { [K in Category]?: CategoryAggregate<K>; }; };
+  categories Json? //-> { [K in Category]?: { [k: string]: CategoryAggregate } };
+
+  sourceUpdatedAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,59 +1,31 @@
 {
-  "name": "n-ame",
-  "version": "0.0.1",
-  "description": "",
-  "main": "dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "packageManager": "pnpm@7.11.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/myleslinder/..."
-  },
-  "homepage": "https://github.com/myleslinder/...",
-  "sideEffects": false,
-  "scripts": {
-    "build": "tsup",
-    "format": "prettier --write .",
-    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
-    "typecheck": "tsc -b",
-    "prepublishOnly": "pnpm run build",
-    "test": "vitest",
-    "v:patch": "npm version patch",
-    "update:check": "pnpm dlx taze"
-  },
-  "tsup": {
-    "entry": [
-      "src/index.ts"
-    ],
-    "splitting": false,
-    "sourcemap": false
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "prettier": "2.7.1",
-    "tsup": "^6.2.3",
-    "typescript": "^4.8.2",
-    "@typescript-eslint/eslint-plugin": "^5.8.1",
-    "@typescript-eslint/parser": "^5.8.1",
-    "eslint": "^8.5.0",
-    "eslint-config-prettier": "^8.5.0",
-    "vite": "^3.0.7",
-    "vitest": "^0.22.0",
-    "happy-dom": "^6.0.4"
-  },
-  "peerDependencies": {},
-  "keywords": [],
-  "author": "Myles Linder",
-  "license": "MIT"
+	"name": "kysely-generator-monorepo",
+	"version": "0.0.1",
+	"description": "",
+	"packageManager": "pnpm@7.11.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/myleslinder/..."
+	},
+	"homepage": "https://github.com/myleslinder/...",
+	"sideEffects": false,
+	"scripts": {
+		"generate": "pnpm build && pnpm --filter example build:prisma",
+		"build": "pnpm --filter prisma-generator-kysely build"
+	},
+	"dependencies": {},
+	"peerDependencies": {},
+	"devDependencies": {
+		"@myleslinder/prettier-config": "^0.0.1",
+		"@typescript-eslint/eslint-plugin": "^5.8.1",
+		"@typescript-eslint/parser": "^5.8.1",
+		"eslint": "^8.5.0",
+		"eslint-config-prettier": "^8.5.0",
+		"prettier": "2.7.1",
+		"prettier-plugin-prisma": "^4.4.0",
+		"typescript": "^4.8.2"
+	},
+	"keywords": [],
+	"author": "Myles Linder",
+	"license": "MIT"
 }

@@ -1,4 +1,3 @@
-/dist
+dist
 /coverage
 .next/
-**/*.yaml

@@ -1,0 +1,62 @@
+{
+	"name": "prisma-generator-kysely",
+	"version": "0.0.1",
+	"description": "",
+	"main": "dist/bin.js",
+	"module": "./dist/bin.mjs",
+	"bin": {
+		"prisma-generator-kysely": "bin/cli.js"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/bin.d.ts",
+			"require": "./dist/bin.cjs",
+			"import": "./dist/bin.mjs"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"packageManager": "pnpm@7.11.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/myleslinder/..."
+	},
+	"homepage": "https://github.com/myleslinder/...",
+	"sideEffects": true,
+	"scripts": {
+		"build": "tsup",
+		"format": "prettier --write .",
+		"lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+		"typecheck": "tsc -b",
+		"prepublishOnly": "pnpm run build",
+		"test": "vitest",
+		"v:patch": "npm version patch",
+		"update:check": "pnpm dlx taze"
+	},
+	"tsup": {
+		"entry": [
+			"src/bin.ts"
+		],
+		"splitting": false,
+		"sourcemap": false
+	},
+	"dependencies": {
+		"@prisma/generator-helper": "^4.4.0"
+	},
+	"peerDependencies": {
+		"prisma": "^4.0.0"
+	},
+	"devDependencies": {
+		"@prisma/internals": "^4.4.0",
+		"@types/node": "^18.8.3",
+		"@types/prettier": "^2.7.1",
+		"kysely": "^0.22.0",
+		"tsup": "^6.2.3",
+		"vite": "^3.0.7",
+		"vitest": "^0.22.0"
+	},
+	"keywords": [],
+	"author": "Myles Linder",
+	"license": "MIT"
+}
